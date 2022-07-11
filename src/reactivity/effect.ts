@@ -70,7 +70,7 @@ export function effect(fn, options: effectOptions = {}) {
   extent(_effect, options);
   _effect.onStop = options.onStop;
   _effect.run();
-  const runner = _effect.run.bind(_effect);
+  const runner: any = _effect.run.bind(_effect);
   runner.effect = _effect;
   return runner;
 }
