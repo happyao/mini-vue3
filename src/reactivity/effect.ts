@@ -1,12 +1,14 @@
 class ReactiveEffect {
     private _fn
-    constructor(fn){
+    private scheduler:Function |undefined
+    constructor(fn,scheduler){
        this._fn = fn 
+       this.scheduler = scheduler
     }
 
     run(){
         activeEffect = this
-        this._fn()
+        return this._fn()
     }
 }
 //存储副作用的函数桶 WeakMap 便于垃圾回收
@@ -30,14 +32,23 @@ export function trigger(target, key){
     let  depsMap = targetMap.get(target)
     let deps = depsMap.get(key)
     deps.forEach(effect =>{
-        effect.run()
+        if(effect.scheduler){
+            effect.scheduler()
+        }else{
+            effect.run()
+        }
+        
     })
 
     
 }
 let activeEffect;
-export function effect(fn){
-   let _effect =  new ReactiveEffect(fn)
+type effectOptions = {
+    scheduler?:Function
+}
+export function effect(fn,options:effectOptions = {}){
+   let _effect =  new ReactiveEffect(fn,options.scheduler)
    _effect.run()
+   return _effect.run.bind(_effect)
 }
 
