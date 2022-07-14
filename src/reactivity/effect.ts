@@ -1,4 +1,4 @@
-import { extent } from "../shared";
+import { extend } from "../shared";
 let shouldTrack;
 class ReactiveEffect {
   private _fn;
@@ -83,7 +83,7 @@ type effectOptions = {
 
 export function effect(fn, options: effectOptions = {}) {
   let _effect = new ReactiveEffect(fn);
-  extent(_effect, options);
+  extend(_effect, options);
   _effect.onStop = options.onStop;
   _effect.run();
   const runner: any = _effect.run.bind(_effect);
