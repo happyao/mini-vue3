@@ -8,6 +8,8 @@ describe("readonly", () => {
     expect(wrapped.foo).toBe(1);
     expect(isReadOnly(wrapped)).toBe(true);
     expect(isReadOnly(original)).toBe(false);
+    expect(isReadOnly(wrapped.bar)).toBe(true);
+    expect(isReadOnly(original.bar)).toBe(false);
   });
   it("should call console.warn when set", () => {
     console.warn = jest.fn();
