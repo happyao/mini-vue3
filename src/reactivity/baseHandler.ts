@@ -20,7 +20,7 @@ function createGetter(isReadonly = false, shallow = false) {
       return isReadonly ? readonly(res) : reactive(res);
     }
     if (!isReadonly) {
-      //触发依赖
+      //收集依赖
       track(target, key);
     }
     return res;
@@ -29,7 +29,7 @@ function createGetter(isReadonly = false, shallow = false) {
 function createSetter() {
   return function set(target, key, value) {
     const res = Reflect.set(target, key, value);
-    //收集依赖
+    //触发依赖
     trigger(target, key);
     return res;
   };

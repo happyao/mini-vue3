@@ -12,8 +12,6 @@ describe("ref", () => {
     const bProxy = new Proxy(b, {
       get() {},
     });
-    console.log(b, bProxy, Object.is(b, bProxy));
-
     const a = ref(1);
     let dummy;
     let calls = 0;

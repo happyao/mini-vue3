@@ -1,18 +1,19 @@
 import { extend } from "../shared";
-let shouldTrack;
+let shouldTrack = false;
 let activeEffect;
 type effectOptions = {
   scheduler?: Function;
   [key: string]: any;
 };
-class ReactiveEffect {
+export class ReactiveEffect {
   private _fn;
   deps = [];
   active = true; //flag防止重复清空
   onStop?: () => void;
-  //public scheduler: Function | undefined; //public?
-  constructor(fn) {
+  public scheduler: Function | undefined; //public?
+  constructor(fn, scheduler?) {
     this._fn = fn;
+    this.scheduler = scheduler;
   }
 
   run() {
@@ -74,6 +75,7 @@ export function isTracking() {
 }
 export function trigger(target, key) {
   let depsMap = targetMap.get(target);
+  if (!depsMap) return;
   let dep = depsMap.get(key);
   triggerEffects(dep);
 }
@@ -88,7 +90,7 @@ export function triggerEffects(dep) {
 }
 
 export function effect(fn, options: effectOptions = {}) {
-  let _effect = new ReactiveEffect(fn);
+  let _effect = new ReactiveEffect(fn, options.scheduler);
   extend(_effect, options);
   _effect.onStop = options.onStop;
   _effect.run();
