@@ -1,5 +1,10 @@
 import { extend } from "../shared";
 let shouldTrack;
+let activeEffect;
+type effectOptions = {
+  scheduler?: Function;
+  [key: string]: any;
+};
 class ReactiveEffect {
   private _fn;
   deps = [];
@@ -55,19 +60,25 @@ export function track(target, key) {
     dep = new Set();
     depsMap.set(key, dep);
   }
+  trackEffects(dep);
+}
+export function trackEffects(dep) {
   //不必重复收集副作用
   if (dep.has(activeEffect)) return;
   dep.add(activeEffect);
   activeEffect.deps.push(dep);
 }
 //控制收集行为
-function isTracking() {
+export function isTracking() {
   return shouldTrack && activeEffect !== undefined;
 }
 export function trigger(target, key) {
   let depsMap = targetMap.get(target);
-  let deps = depsMap.get(key);
-  deps.forEach((effect) => {
+  let dep = depsMap.get(key);
+  triggerEffects(dep);
+}
+export function triggerEffects(dep) {
+  dep.forEach((effect) => {
     if (effect.scheduler) {
       effect.scheduler();
     } else {
@@ -75,11 +86,6 @@ export function trigger(target, key) {
     }
   });
 }
-let activeEffect;
-type effectOptions = {
-  scheduler?: Function;
-  [key: string]: any;
-};
 
 export function effect(fn, options: effectOptions = {}) {
   let _effect = new ReactiveEffect(fn);
