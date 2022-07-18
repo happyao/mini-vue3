@@ -5,7 +5,6 @@ export const App = {
     window.self = this
     // ui
     // return h('div', {}, 'hi, ' + this.msg)
-    debugger
     return h(
       'div',
       {

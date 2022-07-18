@@ -54,11 +54,12 @@ function mountComponent(initialVNode: any, container: any) {
   setupRenderEffect(instance, initialVNode, container);
 }
 function setupRenderEffect(instance: any, initialVNode, container) {
-  // subTree return h('div', 'hi, ' + this.msg)
+  // instance.render 函数其实就是 return h('div', 'hi, ' + this.msg)
+  // h函数调用 => createVNode => 返回vnode
   const subTree = instance.render.call(instance.proxy);
   // subTree = vnode
-  // vnode => patch
-  // vnode => element => mountElement
+  // vnode 调用=> patch
+  // vnode => element =>挂载 mountElement
   // 递归
   patch(subTree, container);
   // Important!！ 子节点的挂载都初始化完成后
