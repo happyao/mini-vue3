@@ -25,7 +25,7 @@ function handleSetupResult(instance, setupResult: any) {
   }
   finishComponentSetup(instance);
 }
-//保证render有值？
+//保证render有值
 function finishComponentSetup(instance: any) {
   const Component = instance.type;
   console.log("finishComponentSetup", Component);

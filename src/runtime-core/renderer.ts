@@ -8,9 +8,36 @@ function patch(vnode, container) {
   // 判断vnode是不是element类型
   // 是element应该处理element
   // TODO
+  if (typeof vnode.type === "string") {
+    processElement(vnode, container);
+  } else {
+    // 是component处理component
+    processComponent(vnode, container);
+  }
+}
+function processElement(vnode, container) {
+  mountElement(vnode, container);
+}
 
-  // 是component处理component
-  processComponent(vnode, container);
+function mountElement(vnode, container) {
+  //将元素插入
+  const { type, props, children } = vnode;
+  const el = document.createElement(type);
+  if (typeof children === "string") {
+    el.textContent = children;
+  } else {
+    mountChildren(vnode, el);
+  }
+  for (let key in props) {
+    let value = props[key];
+    el.setAttribute(key, value);
+  }
+  container.append(el);
+}
+function mountChildren(vnode, containter) {
+  vnode.children.forEach((v) => {
+    patch(v, containter);
+  });
 }
 function processComponent(vnode: any, container: any) {
   mountComponent(vnode, container);
