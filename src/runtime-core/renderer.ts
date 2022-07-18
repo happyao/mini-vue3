@@ -1,4 +1,5 @@
 import { createComponentInstance, setupComponent } from "./component";
+import { isObject } from "../shared/index";
 
 export function render(vnode, container) {
   //patch 递归处理
@@ -10,7 +11,7 @@ function patch(vnode, container) {
   // TODO
   if (typeof vnode.type === "string") {
     processElement(vnode, container);
-  } else {
+  } else if (isObject(vnode.type)) {
     // 是component处理component
     processComponent(vnode, container);
   }
