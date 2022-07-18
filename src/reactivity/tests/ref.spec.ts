@@ -46,8 +46,9 @@ describe("ref", () => {
     expect(calls).toBe(2);
     expect(dummy).toBe(2);
     a.value.count = 2;
-    // expect(calls).toBe(2);
-    // expect(dummy).toBe(2);
+    //Question:same value should not trigger 在 ref嵌套的 reactive 中未生效？
+    //expect(calls).toBe(2);
+    expect(dummy).toBe(2);
   });
   it("isRef", () => {
     const a = ref(1);
