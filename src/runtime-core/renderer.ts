@@ -21,9 +21,10 @@ function processElement(vnode, container) {
 }
 
 function mountElement(vnode, container) {
+  // vnode => element => div
   //将元素插入
   const { type, props, children } = vnode;
-  const el = document.createElement(type);
+  const el = (vnode.el = document.createElement(type));
   if (typeof children === "string") {
     el.textContent = children;
   } else {
@@ -43,21 +44,24 @@ function mountChildren(vnode, containter) {
 function processComponent(vnode: any, container: any) {
   mountComponent(vnode, container);
 }
-
-function mountComponent(vnode: any, container: any) {
+//initialVNode  初始化的节点
+function mountComponent(initialVNode: any, container: any) {
   //创建组件实例
-  const instance = createComponentInstance(vnode);
+  const instance = createComponentInstance(initialVNode);
   //信息收集
   setupComponent(instance);
   // 开箱
-  setupRenderEffect(instance, container);
+  setupRenderEffect(instance, initialVNode, container);
 }
-function setupRenderEffect(instance: any, container) {
+function setupRenderEffect(instance: any, initialVNode, container) {
   // subTree return h('div', 'hi, ' + this.msg)
-  const subTree = instance.render();
+  const subTree = instance.render.call(instance.proxy);
   // subTree = vnode
   // vnode => patch
   // vnode => element => mountElement
   // 递归
   patch(subTree, container);
+  // Important!！ 子节点的挂载都初始化完成后
+  // 将el赋值给当前[组件的]虚拟节点上  支持this.$el
+  initialVNode.el = subTree.el;
 }
