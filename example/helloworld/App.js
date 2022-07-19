@@ -21,7 +21,7 @@ export const App = {
 
   setup () {
     return {
-      msg: 'mini-vuehh'
+      msg: 'mini-vuehhh'
     }
   }
 }
