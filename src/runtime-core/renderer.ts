@@ -9,7 +9,6 @@ export function render(vnode, container) {
 function patch(vnode, container) {
   // 判断vnode是不是element类型
   // 是element应该处理element
-  // TODO
   const { shapeFlag } = vnode;
   if (shapeFlag & ShapeFlags.ELEMENT) {
     processElement(vnode, container);
@@ -29,7 +28,7 @@ function mountElement(vnode, container) {
   const el = (vnode.el = document.createElement(type));
   if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
     el.textContent = children;
-  } else if (shapeFlag && ShapeFlags.ARRAY_CHILDREN) {
+  } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     mountChildren(vnode, el);
   }
   for (let key in props) {
