@@ -32,10 +32,6 @@ export const App = {
           }
         })
       ]
-      // string
-      // "hi, mini-vue"
-      // Array
-      // [h('p', { class: 'red' }, 'hi'), h('p', { class: 'blue' }, 'mini-vue')]
     )
   },
 
