@@ -4,7 +4,7 @@ import { PublicInstanceProxyHandlers } from "./componentPublicInstance";
 import { emit } from "./componentEmit";
 import { initSlots } from "./componentSlots";
 
-export function createComponentInstance(vnode) {
+export function createComponentInstance(vnode, parent) {
   const component = {
     vnode,
     type: vnode.type,
@@ -12,7 +12,11 @@ export function createComponentInstance(vnode) {
     props: {},
     emit: () => {},
     slots: {},
+    provides: parent ? parent.provides : {}, // 初始化把parent.provides挂到provides上面
+    parent,
   };
+  console.log("createComponentInstance", parent);
+
   //emit 函数赋值 将component永远作为第一个入参传入
   component.emit = emit.bind(null, component) as any;
   return component;
@@ -54,6 +58,7 @@ export function getCurrentInstance() {
   return currentInstance;
 }
 //封装成为函数 方便debug
+//注意：只在setup作用域下才能取到currentInstance
 export function setCurrentIntance(instance: any) {
   currentInstance = instance;
 }
