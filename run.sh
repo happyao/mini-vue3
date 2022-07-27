@@ -8,7 +8,7 @@ else
     npm run test
     git status
     git add  .
-    git commit -m $1
+    git commit -m "$*"
     git push
 fi
 
