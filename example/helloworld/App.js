@@ -24,12 +24,13 @@ export const App = {
         h(Foo, {
           count: 1
         }),
-        // string
-        'hi, mini-vue',
+
         // Array
         h('p', { class: 'red' }, 'hi'),
         h('p', { class: 'blue' }, 'mini-vue')
       ]
+      // string
+      // 'hi, mini-vue'
     )
   },
 

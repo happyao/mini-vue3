@@ -5,10 +5,10 @@ export const Foo = {
     return {}
   },
   render () {
-    const foo = h('p', {}, 'foo')
+    const foo = h('p', {}, 'foo1')
 
     // Foo .vnode. children
-    console.log(this.$slots)
+    console.log('$slots', this.$slots)
     // children -> vnode
     //
     // renderSlots
@@ -17,12 +17,17 @@ export const Foo = {
     // 2. 要获取到渲染的位置
     // 作用域插槽
     const age = 18
-    return h('div', {}, [
-      renderSlots(this.$slots, 'header', {
-        age
-      }),
-      foo,
-      renderSlots(this.$slots, 'footer')
-    ])
+    return h(
+      'div',
+      {},
+      //   [foo, ...this.$slots]
+      [
+        renderSlots(this.$slots, 'header', {
+          age
+        }),
+        foo,
+        renderSlots(this.$slots, 'footer')
+      ]
+    )
   }
 }

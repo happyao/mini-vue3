@@ -1,6 +1,7 @@
 import { hasOwn } from "../shared/index";
 const pubicProppertiesMap = {
   $el: (i) => i.vnode.el,
+  $slots: (i) => i.slots,
 };
 export const PublicInstanceProxyHandlers = {
   // { _: instance}改名
@@ -14,6 +15,7 @@ export const PublicInstanceProxyHandlers = {
 
     //用map模式扩展
     let publicGetter = pubicProppertiesMap[key];
+
     if (publicGetter) {
       return publicGetter(instance);
     }
