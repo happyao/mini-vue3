@@ -1,4 +1,4 @@
-import { h } from '../../lib/guide-mini-vue.esm.js'
+import { h, createTextVNode } from '../../lib/guide-mini-vue.esm.js'
 import { Foo } from './Foo.js'
 
 export const App = {
@@ -16,7 +16,10 @@ export const App = {
       // slot 有两种情况  一种是数组 一种是单值 =》 处理为对象， 对象内为 key=>value 函数
       {
         // header: h('p', {}, 'header'),
-        header: ({ age }) => h('p', {}, 'header' + age),
+        header: ({ age }) => [
+          h('p', {}, 'header' + age),
+          createTextVNode('111')
+        ],
         footer: () => h('p', {}, 'footer')
       }
     )
