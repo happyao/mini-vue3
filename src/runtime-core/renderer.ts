@@ -6,7 +6,11 @@ import { createAppAPI } from "./createApp";
 
 export function createRenderer(options) {
   //把具体的实现函数传过来 runtime-dom层
-  const { createElement, patchProp, insert } = options;
+  const {
+    createElement: hostCreateElement,
+    patchProp: hostPatchProp,
+    insert: hostInsert,
+  } = options;
 
   //首次render方法
   function render(vnode, container) {
@@ -52,7 +56,9 @@ export function createRenderer(options) {
     const { type, props, children, shapeFlag } = vnode;
     // new Element
     //const el = (vnode.el = document.createElement(type));
-    const el = (vnode.el = createElement(type));
+    const el = (vnode.el = hostCreateElement(type));
+    console.log("mountElement", el);
+
     // children
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
       el.textContent = children;
@@ -60,12 +66,14 @@ export function createRenderer(options) {
       mountChildren(vnode, el, parentComponent);
     }
     // props
+    console.log("mountElement props", props, el);
+
     for (let key in props) {
       let value = props[key];
-      patchProp(el, key, value);
+      hostPatchProp(el, key, value);
     }
     // container.append(el);
-    insert(el, container);
+    hostInsert(el, container);
   }
   function mountChildren(vnode, containter, parentComponent) {
     vnode.children.forEach((v) => {
