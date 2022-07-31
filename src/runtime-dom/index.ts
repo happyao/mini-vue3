@@ -15,9 +15,10 @@ function patchProp(el, key, prevVal, nextVal) {
     }
   }
 }
-
-function insert(el, parent) {
-  parent.append(el);
+//从锚点开始插入
+function insert(child, parent, anchor) {
+  parent.insertBefore(child, anchor || null);
+  // parent.append(el);
 }
 
 function remove(child) {

@@ -8,6 +8,7 @@ export function createVNode(type, props?, children?) {
     children,
     el: null,
     shapeFlag: getShapeFlag(type),
+    key: props && props.key,
   };
   //这里其实将四个基本的类型进行组合了 4种基本类型变成4种组合类型
   if (typeof children === "string") {

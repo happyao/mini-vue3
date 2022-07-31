@@ -7,7 +7,7 @@ else
     echo "提交：" $*
     npm run test
     git status
-    git add  .
+    git add .
     git commit -m "$*"
     git push
 fi
