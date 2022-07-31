@@ -119,7 +119,7 @@ export function createRenderer(options) {
       console.log("n2.type", n2.type);
       return n1.type === n2.type && n1.key === n2.key;
     }
-    //找出变化范围 i e1 e2
+    //======找出变化范围 i e1 e2=======
     //1.左侧开始比较
     while (i <= e1 && i <= e2) {
       const n1 = c1[i];
@@ -148,8 +148,9 @@ export function createRenderer(options) {
       e2--;
     }
     console.log("patchKeyedChildren 右侧 i", i, e1, e2);
-    //3.新的比老的多 左侧 右边增多 需要创建
-    // 新的比老的多 右侧 左边增多 需要到头部新增节点
+    //3.新的比老的多
+    // 左侧 需要创建到尾部
+    // 右侧 左边增多 需要到头部新增节点
     if (i > e1) {
       if (i <= e2) {
         // Important!! 插入的节点 c2[i]
@@ -166,6 +167,7 @@ export function createRenderer(options) {
       // 4.老的比新的长 删掉老的
       while (i <= e1) {
         // 左侧
+        // 右侧
         hostRemove(c1[i].el);
         i++;
       }
