@@ -148,7 +148,7 @@ export function createRenderer(options) {
       e2--;
     }
     console.log("patchKeyedChildren 右侧 i", i, e1, e2);
-    //3.新的比老的多
+    //3.新的比老的长
     // 左侧 需要创建到尾部
     // 右侧 左边增多 需要到头部新增节点
     if (i > e1) {
@@ -172,7 +172,7 @@ export function createRenderer(options) {
         i++;
       }
     } else {
-      //乱序部分
+      //乱序部分 哈希
     }
   }
   function unmountChildren(children) {
