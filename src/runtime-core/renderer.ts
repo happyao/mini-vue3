@@ -172,7 +172,48 @@ export function createRenderer(options) {
         i++;
       }
     } else {
-      //乱序部分 哈希
+      //中间乱序部分 哈希
+      let s1 = i;
+      let s2 = i;
+      //新节点的总数量 优化删除用 5.1.1
+      const toBePatched = e2 - s2 + 1;
+      let patched = 0;
+
+      // 对新的部分建设映射表
+      const keyToNewIndexMap = new Map();
+      for (let i = s2; i <= e2; i++) {
+        const nextChild = c2[i];
+        keyToNewIndexMap.set(nextChild.key, i);
+      }
+      //c1中的元素 prevChild 是否还存在
+
+      for (let i = s1; i <= e1; i++) {
+        let newIndex;
+        const prevChild = c1[i];
+        if (patched >= toBePatched) {
+          hostRemove(prevChild.el);
+          continue;
+        }
+
+        if (prevChild.key !== null) {
+          newIndex = keyToNewIndexMap.get(prevChild.key);
+        } else {
+          for (let j = s2; j > e2; j++) {
+            if (isSameVNodeType(prevChild, c1[j])) {
+              newIndex = j;
+              break;
+            }
+          }
+        }
+        if (newIndex === undefined) {
+          //当前节点 在新的中已经不存在
+          hostRemove(prevChild.el);
+        } else {
+          //当前节点 在新的中存在 继续进行深度对比
+          patch(prevChild, c2[newIndex], container, parentComponent, null);
+          patched++;
+        }
+      }
     }
   }
   function unmountChildren(children) {
