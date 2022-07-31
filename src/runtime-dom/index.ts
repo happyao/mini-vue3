@@ -19,10 +19,22 @@ function patchProp(el, key, prevVal, nextVal) {
 function insert(el, parent) {
   parent.append(el);
 }
+
+function remove(child) {
+  const parent = child.parentNode;
+  if (parent) {
+    parent.removeChild(child);
+  }
+}
+function setTextElemet(el, text) {
+  el.textContent = text;
+}
 const render: any = createRenderer({
   createElement,
   patchProp,
   insert,
+  remove,
+  setTextElemet,
 });
 
 export function createApp(...args) {
