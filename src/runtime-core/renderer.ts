@@ -1,5 +1,6 @@
 import { createComponentInstance, setupComponent } from "./component";
 import { EMPTY_OBJ, isObject } from "../shared/index";
+import { getSequence } from "../shared/getSequence";
 import { ShapeFlags } from "../shared/shapeFlags";
 import { Fragment, Text, createTextVNode } from "./vnode";
 import { createAppAPI } from "./createApp";
@@ -111,6 +112,8 @@ export function createRenderer(options) {
     parentAnchor
   ) {
     let i = 0;
+    const l2 = c2.length;
+
     let e1 = c1.length - 1;
     let e2 = c2.length - 1;
     function isSameVNodeType(n1, n2) {
@@ -176,16 +179,26 @@ export function createRenderer(options) {
       let s1 = i;
       let s2 = i;
       //新节点的总数量 优化删除用 5.1.1
+
       const toBePatched = e2 - s2 + 1;
       let patched = 0;
 
       // 对新的部分建设映射表
       const keyToNewIndexMap = new Map();
+      // Important!! 新节点到老节点index的映射 用于最长递增子序列
+      const newIndexToOldIndexMap = new Array(toBePatched); //定长数组性能最好
+      //最长递增子序列优化  判断有没有移动过
+      let moved = false;
+      let maxNewIndexSoFar = 0;
+
+      for (let i = 0; i < toBePatched; i++) {
+        newIndexToOldIndexMap[i] = 0;
+      }
+
       for (let i = s2; i <= e2; i++) {
         const nextChild = c2[i];
         keyToNewIndexMap.set(nextChild.key, i);
       }
-      //c1中的元素 prevChild 是否还存在
 
       for (let i = s1; i <= e1; i++) {
         let newIndex;
@@ -194,7 +207,7 @@ export function createRenderer(options) {
           hostRemove(prevChild.el);
           continue;
         }
-
+        //c1中的元素(prevChild) 是否还存在于c2中
         if (prevChild.key !== null) {
           newIndex = keyToNewIndexMap.get(prevChild.key);
         } else {
@@ -205,13 +218,53 @@ export function createRenderer(options) {
             }
           }
         }
+
         if (newIndex === undefined) {
           //当前节点 在新的中已经不存在
           hostRemove(prevChild.el);
         } else {
+          if (newIndex >= maxNewIndexSoFar) {
+            maxNewIndexSoFar = newIndex;
+          } else {
+            moved = true;
+          }
+          //Important!! 新节点到老节点index的映射 用于最长递增子序列
+          //newIndex - s2 从0开始技术
+          //i+1 i有可能为0 单i为0有特殊含义：在新节点中不存在 为了使i不为零所以i+1
+          newIndexToOldIndexMap[newIndex - s2] = i + 1;
           //当前节点 在新的中存在 继续进行深度对比
           patch(prevChild, c2[newIndex], container, parentComponent, null);
           patched++;
+        }
+      }
+      //======中间比对 最长递增子序列 新增 + 位置移动
+      const increasingNewIndexSequence = moved
+        ? getSequence(newIndexToOldIndexMap)
+        : [];
+      console.log(
+        moved,
+        "increasingNewIndexSequence",
+        increasingNewIndexSequence, //[1,2]
+        newIndexToOldIndexMap //[5,3,4]
+      );
+      // Important!! 倒序插入稳定
+      let j = increasingNewIndexSequence.length - 1;
+      for (let i = toBePatched - 1; i >= 0; i--) {
+        const nextIndex = i + s2;
+        const nextChild = c2[nextIndex];
+        // Important !!
+        const anchor = nextIndex + 1 < l2 ? c2[nextIndex + 1].el : null;
+        if (newIndexToOldIndexMap[i] === 0) {
+          //新创建
+          patch(null, nextChild, container, parentComponent, anchor);
+        } else if (moved) {
+          if (j < 0 || i !== increasingNewIndexSequence[j]) {
+            //移动位置
+            console.log(nextChild.el, container, anchor);
+            hostInsert(nextChild.el, container, anchor);
+          } else {
+            j--;
+          }
         }
       }
     }
