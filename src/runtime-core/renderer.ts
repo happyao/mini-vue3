@@ -1,5 +1,5 @@
 import { createComponentInstance, setupComponent } from "./component";
-import { isObject } from "../shared/index";
+import { EMPTY_OBJ, isObject } from "../shared/index";
 import { ShapeFlags } from "../shared/shapeFlags";
 import { Fragment, Text, createTextVNode } from "./vnode";
 import { createAppAPI } from "./createApp";
@@ -64,7 +64,31 @@ export function createRenderer(options) {
     console.log("n2", n2);
     // 更新对比
     // props
+    const oldProps = n1.props || EMPTY_OBJ;
+    const newProps = n2.props || EMPTY_OBJ;
+    const el = (n2.el = n1.el);
+    patchProps(el, oldProps, newProps);
     // children
+  }
+
+  //遍历新prop 重新赋值
+  function patchProps(el, oldProps, newProps) {
+    if (oldProps !== newProps) {
+      for (let key in newProps) {
+        const prevProp = oldProps[key];
+        const nextProp = newProps[key];
+        if (prevProp !== nextProp) {
+          hostPatchProp(el, key, prevProp, nextProp);
+        }
+      }
+      if (oldProps !== EMPTY_OBJ) {
+        for (let key in oldProps) {
+          if (!(key in newProps)) {
+            hostPatchProp(el, key, oldProps[key], null);
+          }
+        }
+      }
+    }
   }
 
   function mountElement(vnode, container, parentComponent) {
@@ -87,7 +111,7 @@ export function createRenderer(options) {
 
     for (let key in props) {
       let value = props[key];
-      hostPatchProp(el, key, value);
+      hostPatchProp(el, key, null, value);
     }
     // container.append(el);
     hostInsert(el, container);

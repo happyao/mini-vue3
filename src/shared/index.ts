@@ -8,3 +8,5 @@ export function hasChanged(newValue, oldVal) {
 export function hasOwn(target, key) {
   return Object.prototype.hasOwnProperty.call(target, key);
 }
+
+export const EMPTY_OBJ = {};
