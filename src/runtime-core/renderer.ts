@@ -5,6 +5,7 @@ import { ShapeFlags } from "../shared/shapeFlags";
 import { Fragment, Text, createTextVNode } from "./vnode";
 import { createAppAPI } from "./createApp";
 import { effect } from "../reactivity/effect";
+import { shouldUpdateComponent } from "./ComponentUpdateUtils";
 
 export function createRenderer(options) {
   //把具体的实现函数传过来 runtime-dom层
@@ -336,7 +337,26 @@ export function createRenderer(options) {
     parentComponent,
     anchor
   ) {
-    mountComponent(n2, container, parentComponent, anchor);
+    if (!n1) {
+      mountComponent(n2, container, parentComponent, anchor);
+    } else {
+      updateComponent(n1, n2);
+    }
+  }
+  //更新组件
+  function updateComponent(n1, n2) {
+    // instance.update 组件更新 effect函数返回值runner 当调用runner时会执行fn, 也就是effect(fn)中的fn
+    const instance = (n2.component = n1.component);
+    //更新组件
+    if (shouldUpdateComponent(n1, n2)) {
+      instance.next = n2;
+      console.log("updateComponent instance", n1, n2);
+      instance.update();
+    } else {
+      //不更新组件
+      n2.el = n1.el;
+      //n2.vnode = n2; // ?? why
+    }
   }
   //initialVNode  初始化的节点
   function mountComponent(
@@ -346,7 +366,10 @@ export function createRenderer(options) {
     anchor
   ) {
     //创建组件实例
-    const instance = createComponentInstance(initialVNode, parentComponent);
+    const instance = (initialVNode.component = createComponentInstance(
+      initialVNode,
+      parentComponent
+    ));
     //信息收集
     setupComponent(instance);
     // 开箱
@@ -358,7 +381,8 @@ export function createRenderer(options) {
     //调用render函数的时候会触发依赖收集 把当前的匿名函数收集起来
     //当响应式的值改变的时候会重新调用依赖函数 也就是render
 
-    effect(() => {
+    // instance.update 组件更新 effect函数返回值runner 当调用runner时会执行fn, 也就是effect(fn)中的fn
+    instance.update = effect(() => {
       if (!instance.isMounted) {
         // instance.render 函数其实就是组件中的 return h('div', 'hi, ' + this.msg)
         // h函数调用 =>创建虚拟节点 createVNode => 返回vnode
@@ -380,6 +404,13 @@ export function createRenderer(options) {
         instance.isMounted = true;
       } else {
         // update!!
+        // next 新的虚拟节点 用于组件的更新
+        const { next, vnode } = instance;
+        if (next) {
+          next.el = vnode.el;
+          updateComponentPreRender(instance, next);
+        }
+
         const subTree = instance.render.call(instance.proxy);
         const prevSubTree = instance.subTree;
 
@@ -395,6 +426,12 @@ export function createRenderer(options) {
         patch(prevSubTree, subTree, container, instance, anchor);
       }
     });
+  }
+  // 组件更新
+  function updateComponentPreRender(instance, nextVNode) {
+    instance.vnode = nextVNode;
+    instance.next = null;
+    instance.props = nextVNode.props;
   }
 
   return {

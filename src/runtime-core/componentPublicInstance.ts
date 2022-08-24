@@ -2,6 +2,7 @@ import { hasOwn } from "../shared/index";
 const pubicProppertiesMap = {
   $el: (i) => i.vnode.el,
   $slots: (i) => i.slots,
+  $props: (i) => i.props,
 };
 export const PublicInstanceProxyHandlers = {
   // { _: instance}改名
