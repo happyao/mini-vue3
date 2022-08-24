@@ -355,7 +355,7 @@ export function createRenderer(options) {
     } else {
       //不更新组件
       n2.el = n1.el;
-      //n2.vnode = n2; // ?? why
+      //n2.vnode = n2; // ?? why ??
     }
   }
   //initialVNode  初始化的节点
