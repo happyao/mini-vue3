@@ -6,6 +6,7 @@ import { Fragment, Text, createTextVNode } from "./vnode";
 import { createAppAPI } from "./createApp";
 import { effect } from "../reactivity/effect";
 import { shouldUpdateComponent } from "./ComponentUpdateUtils";
+import { queueJobs } from "./scheduler";
 
 export function createRenderer(options) {
   //把具体的实现函数传过来 runtime-dom层
@@ -382,50 +383,57 @@ export function createRenderer(options) {
     //当响应式的值改变的时候会重新调用依赖函数 也就是render
 
     // instance.update 组件更新 effect函数返回值runner 当调用runner时会执行fn, 也就是effect(fn)中的fn
-    instance.update = effect(() => {
-      if (!instance.isMounted) {
-        // instance.render 函数其实就是组件中的 return h('div', 'hi, ' + this.msg)
-        // h函数调用 =>创建虚拟节点 createVNode => 返回vnode
-        // 【state: 开始】
-        const subTree = (instance.subTree = instance.render.call(
-          instance.proxy
-        ));
-        console.log("isMounted setupRenderEffect", subTree, instance.proxy);
+    instance.update = effect(
+      () => {
+        if (!instance.isMounted) {
+          // instance.render 函数其实就是组件中的 return h('div', 'hi, ' + this.msg)
+          // h函数调用 =>创建虚拟节点 createVNode => 返回vnode
+          // 【state: 开始】
+          const subTree = (instance.subTree = instance.render.call(
+            instance.proxy
+          ));
+          console.log("isMounted setupRenderEffect", subTree, instance.proxy);
 
-        // subTree = vnode 虚拟节点树
-        // vnode 调用=> patch
-        // vnode => element =>挂载 mountElement
-        // 【state: 递归】
-        patch(null, subTree, container, instance, anchor);
-        // Important!！ 子节点的挂载都初始化完成后
-        // 将el赋值给当前[组件的]虚拟节点上  支持this.$el
-        // 【state: 递归结束】
-        initialVNode.el = subTree.el;
-        instance.isMounted = true;
-      } else {
-        // update!!
-        // next 新的虚拟节点 用于组件的更新
-        const { next, vnode } = instance;
-        if (next) {
-          next.el = vnode.el;
-          updateComponentPreRender(instance, next);
+          // subTree = vnode 虚拟节点树
+          // vnode 调用=> patch
+          // vnode => element =>挂载 mountElement
+          // 【state: 递归】
+          patch(null, subTree, container, instance, anchor);
+          // Important!！ 子节点的挂载都初始化完成后
+          // 将el赋值给当前[组件的]虚拟节点上  支持this.$el
+          // 【state: 递归结束】
+          initialVNode.el = subTree.el;
+          instance.isMounted = true;
+        } else {
+          // update!!
+          // next 新的虚拟节点 用于组件的更新
+          const { next, vnode } = instance;
+          if (next) {
+            next.el = vnode.el;
+            updateComponentPreRender(instance, next);
+          }
+
+          const subTree = instance.render.call(instance.proxy);
+          const prevSubTree = instance.subTree;
+
+          console.log(
+            "update prevSubTree",
+            prevSubTree,
+            "currentSubTree",
+            subTree
+          );
+          // 重新更新subTree
+          instance.subTree = subTree;
+          // Important!！ 让patch也支持更新  n1=>old n2=>new
+          patch(prevSubTree, subTree, container, instance, anchor);
         }
-
-        const subTree = instance.render.call(instance.proxy);
-        const prevSubTree = instance.subTree;
-
-        console.log(
-          "update prevSubTree",
-          prevSubTree,
-          "currentSubTree",
-          subTree
-        );
-        // 重新更新subTree
-        instance.subTree = subTree;
-        // Important!！ 让patch也支持更新  n1=>old n2=>new
-        patch(prevSubTree, subTree, container, instance, anchor);
+      },
+      {
+        scheduler() {
+          queueJobs(instance.update);
+        },
       }
-    });
+    );
   }
   // 组件更新
   function updateComponentPreRender(instance, nextVNode) {
