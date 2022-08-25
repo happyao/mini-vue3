@@ -27,18 +27,17 @@ export default {
     }
     async function onClick2 () {
       for (let i = 0; i < 1000; i++) {
-        console.log('update')
         count.value = i
       }
       //异步执行 拿不到视图上的数据
       const el = instance.vnode.el
       console.log('instance', instance, el.innerText) //1
-      //   nextTick(() => {
-      //     console.log('instance', instance, el.innerText) //99
-      //   })
+      nextTick(() => {
+        console.log('instance', instance, el.innerText) //99
+      })
 
-      await nextTick()
-      console.log('instance', instance, el.innerText)
+      //   await nextTick()
+      //   console.log('instance', instance, el.innerText)
     }
 
     return {
