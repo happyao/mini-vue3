@@ -18,14 +18,31 @@ function parseChildren(context) {
     if (/[a-z]/i.test(s[1])) {
       node = parseElement(context);
     }
+  } else {
+    node = parseText(context);
   }
   nodes.push(node);
   return nodes;
 }
 
+function parseText(context: any) {
+  const content = parseTextData(context, context.source.length);
+  console.log(context);
+
+  return {
+    type: NodeTypes.TEXT,
+    content,
+  };
+}
+
+function parseTextData(context: any, length) {
+  const content = context.source.slice(0, length);
+  //推进
+  advanceBy(context, content.length);
+  return content;
+}
 function parseElement(context) {
   const element = parseTag(context, TagType.Start);
-  console.log(context);
   parseTag(context, TagType.End);
   console.log(context);
 
@@ -51,15 +68,16 @@ function parseInterpolation(context) {
   // {{message}}
   const openDelimiter = "{{";
   const closeDelimiter = "}}";
+
   const closeIndex = context.source.indexOf("}}", openDelimiter.length);
   // 此处用作推进
   advanceBy(context, openDelimiter.length);
   const rawContentLength = closeIndex - openDelimiter.length;
-  const rawContent = context.source.slice(0, rawContentLength);
+  const rawContent = parseTextData(context, rawContentLength);
   //处理边缘case
   const content = rawContent.trim();
   // 此处用作推进
-  advanceBy(context, rawContentLength + closeDelimiter.length);
+  advanceBy(context, closeDelimiter.length);
   return {
     type: NodeTypes.INTERPOLATION,
     content: {

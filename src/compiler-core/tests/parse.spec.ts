@@ -15,10 +15,21 @@ describe("Parse", () => {
   });
 
   describe("element", () => {
-    const ast = baseParse("<div></div>");
-    expect(ast.children[0]).toStrictEqual({
-      type: NodeTypes.ELEMENT,
-      tag: "div",
+    test("simple element div", () => {
+      const ast = baseParse("<div></div>");
+      expect(ast.children[0]).toStrictEqual({
+        type: NodeTypes.ELEMENT,
+        tag: "div",
+      });
+    });
+  });
+  describe("text", () => {
+    test("simple text", () => {
+      const ast = baseParse("some test");
+      expect(ast.children[0]).toStrictEqual({
+        type: NodeTypes.TEXT,
+        content: "some test",
+      });
     });
   });
 });
