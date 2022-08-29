@@ -1,12 +1,13 @@
 
-export function transform(root, options){
+export function transform(root, options={}){
   const context = createTransformContext(root, options)
 
   // 1.遍历 -深度优先搜索
   traverse(root, context)
-  // 2.修改text content
   
 
+  createRootCodegen(root)
+  
 }
 
 
@@ -16,10 +17,14 @@ function traverse(node, context){
   //   node.content += ' mini-vue'
   // }
   const { nodeTransforms } = context;
-  for (let i = 0; i < nodeTransforms.length; i++) {
-    const transform = nodeTransforms[i];
-    transform(node)
+  if(nodeTransforms){
+    for (let i = 0; i < nodeTransforms.length; i++) {
+      const transform = nodeTransforms[i];
+    // 2.修改text content
+      transform(node)
+    }
   }
+  
 
   //执行流程的稳定点
   traversChildren(node, context)
@@ -42,3 +47,7 @@ function createTransformContext(root: any, options: any) {
   }
   return context
 }
+function createRootCodegen(root: any) {
+  root.codegenNode = root.children[0]
+}
+
