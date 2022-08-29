@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "./lib/guide-mini-vue.cjs.js",
-  "module":"./lib/guide-mini-vue.esm.js",
+  "module": "./lib/guide-mini-vue.esm.js",
   "scripts": {
     "test": "jest",
     "build": "rollup -c rollup.config.js"
@@ -19,7 +19,8 @@
   },
   "homepage": "https://github.com/happyao/mini-vue3#readme",
   "dependencies": {
-    "jest": "^28.1.2"
+    "jest": "^28.1.2",
+    "tslib": "^2.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.18.6",
