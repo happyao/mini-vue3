@@ -54,6 +54,11 @@ function handleSetupResult(instance, setupResult: any) {
 //保证render有值
 function finishComponentSetup(instance: any) {
   const Component = instance.type;
+  if(compiler && !Component.render){
+    if(Component.template){
+      Component.render = compiler(Component.template)
+    }
+  }
   console.log("finishComponentSetup", Component);
   instance.render = Component.render;
 }
@@ -65,4 +70,9 @@ export function getCurrentInstance() {
 //注意：只在setup作用域下才能取到currentInstance
 export function setCurrentIntance(instance: any) {
   currentInstance = instance;
+}
+
+let compiler;
+export function registerRuntimeCompiler(_compiler){
+  return  compiler = _compiler
 }

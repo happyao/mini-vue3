@@ -390,7 +390,8 @@ export function createRenderer(options) {
           // h函数调用 =>创建虚拟节点 createVNode => 返回vnode
           // 【state: 开始】
           const subTree = (instance.subTree = instance.render.call(
-            instance.proxy
+            instance.proxy,
+            instance.proxy // render的第一个入参
           ));
           console.log("isMounted setupRenderEffect", subTree, instance.proxy);
 
@@ -413,7 +414,7 @@ export function createRenderer(options) {
             updateComponentPreRender(instance, next);
           }
 
-          const subTree = instance.render.call(instance.proxy);
+          const subTree = instance.render.call(instance.proxy,instance.proxy );// render的第一个入参
           const prevSubTree = instance.subTree;
 
           console.log(
