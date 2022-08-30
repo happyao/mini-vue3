@@ -78,8 +78,6 @@ function parseElement(context, ancestors) {
   element.children = parseChildren(context, ancestors);
   //弹出
   ancestors.pop();
-  console.log("element.tag", element.tag);
-  console.log("context.source", context.source);
   // 匹配上再消费结束标签
   if (startWithEndOpen(context.source, element.tag)) {
     parseTag(context, TagType.End);

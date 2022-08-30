@@ -1,5 +1,6 @@
+import { isString } from "../../shared"
 import { NodeTypes } from "./ast"
-import { helperMapName, TO_DISPLAY_STRING } from "./runtimeHelpers"
+import { CREATE_ELEMENT_VNODE, helperMapName, TO_DISPLAY_STRING } from "./runtimeHelpers"
 
 export function generate(ast){
   const context = createCodegenContext()
@@ -12,7 +13,6 @@ export function generate(ast){
   const functionName = 'render'
   const args = ["_ctx","_cache"]
   const signature = args.join(',')
-  console.log('generate ast',ast);
   
   push(`function ${functionName}(${signature}){`)
   push(`return `)
@@ -36,11 +36,51 @@ function genNode(node:any, context){
     case NodeTypes.SIMPLE_EXPRESSION:
       genExpression(node,context)
       break
-
+    case NodeTypes.ELEMENT:
+      genElement(node,context)
+      break;
+    case NodeTypes.COMPOUND_EXPRESSION:
+      genCompoundExpress(node, context)
     default:
       break;
   }
 
+}
+function genElement(node, context){
+  const {push, helper} = context
+  const {tag, children, props} = node
+  
+ push(`${helper(CREATE_ELEMENT_VNODE)}(`)
+ genNodeList(getNullable([tag, props, children]), context)
+//  push(`${helper(CREATE_ELEMENT_VNODE)}("${tag}"), null, "hi, " + _toDisplayString(_ctx.message)`);
+//  for (let i = 0; i < children.length; i++) {
+//    const child = children[i];
+//    genNode(child, context)
+//  }
+
+// const child = children[0]
+ //genNode(children, context)
+
+ push(")")
+}
+function genNodeList(nodes,context){
+  const {push} = context
+  
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if(isString(node)){
+      push(node)
+    }else{
+      genNode(node, context)
+
+    } 
+    if(i< nodes.length -1)  {
+      push(", ")
+    }
+  }
+}
+function getNullable(args:any){
+ return args.map( arg => arg || "null")
 }
 function genText(node, context){
   const {push} = context
@@ -60,7 +100,20 @@ function genExpression(node: any, context: any) {
   push(`${node.content}`)
 }
 
-// 创建上下文对象
+function genCompoundExpress(node: any, context: any) {
+  const children = node.children
+  const {push} = context
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i];
+    if(isString(child)){
+      push(child)
+    }else{
+      genNode(child, context) 
+    }
+  }
+} 
+
+// 创建上下文对象 对方法进行封装
 function createCodegenContext() {
   const context = {
     code:'',

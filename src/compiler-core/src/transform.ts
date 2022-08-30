@@ -18,12 +18,16 @@ function traverseNode(node, context){
   // if(node.type === NodeTypes.TEXT){
   //   node.content += ' mini-vue'
   // }
+  
   const { nodeTransforms } = context;
+  const exitFns:any = []
   if(nodeTransforms){
     for (let i = 0; i < nodeTransforms.length; i++) {
       const transform = nodeTransforms[i];
-    // 2.修改text content
-      transform(node)
+      // 2.插件方法 对node进行transform，以方便后续生成函数字符串 codegen
+     const onExit =  transform(node,context)
+     // Important !!
+     if(onExit) exitFns.push(onExit)
     }
   }
 
@@ -36,9 +40,17 @@ function traverseNode(node, context){
       //执行流程的稳定点
       traversChildren(node, context)
       break;
+
     default:
       break
   } 
+  
+
+  let i = exitFns.length
+  //从后往前执行 transform
+  while(i--){
+    exitFns[i]()
+  }
 }
 
 function traversChildren(node, context){
@@ -61,6 +73,13 @@ function createTransformContext(root: any, options: any) {
   return context
 }
 function createRootCodegen(root: any) {
-  root.codegenNode = root.children[0]
+  const child = root.children[0]
+  
+  if(child.type === NodeTypes.ELEMENT){
+    root.codegenNode = child.codegenNode
+  }else{
+    root.codegenNode = root.children[0]
+  }
+
 }
 
